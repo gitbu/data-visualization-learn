@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <canvas id="canvas" />
+  <script type="shader-source" id="vertexShader">
+    void main() {
+      //浮点数设置为中等精度
+		  precision mediump float;
+      // 声明顶点位置
+      gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
+      // 设置顶点的大小
+      gl_PointSize = 10.0;
+    }
+  </script>
+  <script type="shader-source" id="fragmentShader">
+    void main() {
+      //浮点数设置为中等精度
+		  precision mediump float;
+      // 设置像素的填充颜色
+      gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+    }
+  </script>
+  <script type="module">
+    import {
+      randomColor,
+      _$,
+      createShaderFromScript,
+      createSimpleProgram,
+    } from '../../util/webgl-helper.js';
+    // 获取canvas元素
+    const canvas = _$('#canvas');
+    // 创建webgl上下文
+    const gl = canvas.getContext('webgl');
+
+    // 创建顶点着色器
+    const vertexShader = createShaderFromScript(gl, 'vertex', 'vertexShader');
+
+    // 创建片元着色器
+    const fragmentShader = createShaderFromScript(gl, 'fragment', 'fragmentShader');
+
+    // 创建做色器程序
+    const program = createSimpleProgram(gl, vertexShader, fragmentShader);
+
+    // 使用刚刚创建好的程序
+    gl.useProgram(program);
+
+    //设置清空画布颜色为黑色。
+    gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+    //用上一步设置的清空画布颜色清空画布。
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    // 开始绘制
+    gl.drawArrays(gl.POINTS, 0, 1);
+  </script>
+  
+</body>
+</html>
