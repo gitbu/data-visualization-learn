@@ -34,3 +34,36 @@ export const createSimpleProgram = (gl, vertexShader, fragmentShader) => {
 
   return program;
 }
+
+// 创建buffer
+export const createBuffer = (gl, attribute, vertexAttribPointerOptions) => {
+  let {
+    size,
+    type = gl.FLOAT,
+    normalize = false,
+    stride = 0,
+    offset = 0,
+  } = vertexAttribPointerOptions;
+  // 激活属性
+  gl.enableVertexAttribArray(attribute);
+  // 创建buffer
+  const buffer = gl.createBuffer();
+  // 指定绑定点
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  // 设置读取数据的方式
+  gl.vertexAttribPointer(
+    attribute,
+    size,
+    type,
+    normalize,
+    stride,
+    offset
+  );
+
+  return buffer;
+}
+
+// 切换buffer
+export const changeBuffer = (gl, buffer) => {
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+}
