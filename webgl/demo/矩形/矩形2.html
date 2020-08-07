@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>索引方式绘制矩形</title>
+</head>
+<body>
+  <canvas height="400" width="400" id="canvas"></canvas>
+  <script type="shader-source" id="vertexSource">
+    precision mediump float;
+    attribute vec2 a_Position;
+    attribute vec2 a_Screen_Size;
+    attribute vec4 a_Color;
+    varying vec4 v_Color;
+
+    void main() {
+      vec2 position = (a_Position / a_Screen_Size) * 2.0 - 1.0;
+      position = position * vec2(1.0, - 1.0);
+      gl_Position = vec4(position, 0.0, 1.0);
+      
+      gl_PointSize = 10.0;
+
+      v_Color = a_Color;
+    }
+  </script>
+  <script type="shader-source" id="fragmentSource">
+    precision mediump float;
+    varying vec4 v_Color;
+
+    void main() {
+      vec4 color = v_Color / vec4(255.0, 255.0, 255.0, 1.0);
+
+      gl_FragColor = color;
+    }
+  </script>
+  <script type="module">
+    import {
+      _$,
+      createShaderFromScript,
+      createSimpleProgram,
+    } from '../../util/webgl-helper.js'
+    // 获取canvas画布
+    const canvasEle = _$('#canvas');
+    // 创建webgl上下文
+    const gl = canvasEle.getContext('webgl');
+
+    // 创建顶点着色器对象
+    const vertexShader = createShaderFromScript(gl, 'vertex', 'vertexSource');
+    // 创建片元着色器对象
+    const fragmentShader = createShaderFromScript(gl, 'fragment', 'fragmentSource');
+
+    // 创建着色器程序 
+    const program = createSimpleProgram(gl, vertexShader, fragmentShader);
+    // 使用着色器程序
+    gl.useProgram(program);
+
+    // 获取a_Position
+    const a_Position = gl.getAttribLocation(program, 'a_Position');
+    // 获取a_Screen_Size
+    const a_Screen_Size = gl.getAttribLocation(program, 'a_Screen_Size');
+    // 设置a_Screen_Size的值
+    gl.vertexAttrib2f(a_Screen_Size, canvasEle.width, canvasEle.height);
+    // 获取a_Color
+    const a_Color = gl.getAttribLocation(program, 'a_Color');
+
+    // 激活a_Position
+    gl.enableVertexAttribArray(a_Position);
+    // 激活a_Color
+    gl.enableVertexAttribArray(a_Color);
+
+    // 定义四个顶点数据
+    let positions = [
+    	//V0
+    	30, 30, 255, 0, 0, 1,
+    	//V1
+    	30, 300, 0, 255, 0, 1, 
+    	//V2
+    	300, 300, 0, 255, 0, 1, 
+    	//V3
+    	300, 30, 0, 0, 255, 1
+    ];
+
+    // 创建缓存区
+    const buffer = gl.createBuffer();
+    // 绑定当前缓存到数组缓存区
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    // 设置属性a_Position从缓存中的读取的方式
+    gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 24, 0);
+    // 设置属性a_Color从缓存中读取的方式
+    gl.vertexAttribPointer(a_Color, 4, gl.FLOAT, false, 24, 8);
+    // 向缓冲区传递数据
+	  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+    // 绘制索引数组
+    const indices = [0, 1, 2, 0, 2, 3];
+    // 创建索引缓存区
+    const indicesBuffer = gl.createBuffer();
+    // 绑定当前缓存区到索引缓存区
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indicesBuffer);
+    // 向索引缓冲区传递索引数据
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+
+    // 设置清屏颜色为黑色
+    gl.clearColor(0, 0, 0, 1);
+
+    // 定义渲染函数
+    function render(gl) {
+      // 用上面设置的清屏颜色清屏
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      // 用索引的方式绘制图
+      gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+    }
+
+    render(gl);
+
+
+
+  </script>
+</body>
+</html>

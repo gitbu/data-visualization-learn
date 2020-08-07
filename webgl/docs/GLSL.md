@@ -44,4 +44,4 @@ varying是vertex和fragment shader之间做数据传递用的。一般vertex sha
 ## 学习资料
 
 [GLSL详解](https://colin1994.github.io/2017/11/11/OpenGLES-Lesson04/)
-
+[内置函数](https://blog.csdn.net/hgl868/article/details/7876257)

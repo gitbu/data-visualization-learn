@@ -67,3 +67,28 @@ export const createBuffer = (gl, attribute, vertexAttribPointerOptions) => {
 export const changeBuffer = (gl, buffer) => {
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 }
+
+// 加载纹理
+export const loadTexture = (gl, src, attribute, callback) => {
+  // 创建img对象
+  const img = new Image();
+  // 图片加载成功后纹理的处理
+  img.onload = () => {
+    // 激活纹理0号通道 
+    gl.activeTexture(gl.TEXTURE0);
+    // 创建纹理对象
+    const texture = gl.createTexture();
+    // 绑定纹理对象
+    gl.bindTexture(gl.TEXTURE_2D, texture)
+    // 将图片数据传递到片元着色器
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img); 
+    // 设置图片缩放算法
+    gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameterf(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    // 设置attribute的值
+    gl.uniform1i(attribute, 0);
+    callback && callback()
+  }
+  // 加载img图片
+  img.src = src;
+}

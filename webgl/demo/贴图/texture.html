@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <canvas id="canvas" width="350" height="350"></canvas>
+  <script type="shader-source" id="vertexSource">
+    precision mediump float;
+    // 定点坐标
+    attribute vec2 a_Position;
+    // 画布大小
+    attribute vec2 a_Screen_Size;
+    // 纹理坐标
+    attribute vec2 a_Uv;
+    // 传递片元着色器变量
+    varying vec2 v_Uv;
+
+    void main() {
+      vec2 position = (a_Position / a_Screen_Size) * 2.0 - 1.0;
+      position = position * vec2(1.0, -1.0);
+      gl_Position = vec4(position, 0, 1);
+
+      v_Uv = a_Uv;
+    }
+  </script>
+  <script type="shader-source" id="fragmentSource">
+    precision mediump float;
+    varying vec2 v_Uv;
+    uniform sampler2D u_Texture;
+
+    void main() {
+      gl_FragColor = texture2D(u_Texture, vec2(v_Uv.x, v_Uv.y));
+    }
+  </script>
+  <script type="module">
+    import {
+      _$,
+      createShaderFromScript,
+      createSimpleProgram,
+      loadTexture,
+    } from '../../util/webgl-helper.js';
+
+    // 获取canvas上下文
+    const canvasCtx = _$('#canvas');
+    // 创建webgl上下文
+    const gl = canvasCtx.getContext('webgl');
+
+    // 创建顶级着色器
+    const vertexShader = createShaderFromScript(gl, 'vertex', 'vertexSource');
+    // 创建片元着色器
+    const fragmentShader = createShaderFromScript(gl, 'fragment', 'fragmentSource');
+
+    // 创建着色器程序
+    const program = createSimpleProgram(gl, vertexShader, fragmentShader);
+    // 使用着色器程序
+    gl.useProgram(program);
+
+    // 获取a_Position
+    const a_Position = gl.getAttribLocation(program, 'a_Position');
+    // 获取a_Screen_Size
+    const a_Screen_Size = gl.getAttribLocation(program, 'a_Screen_Size');
+    // 获取a_Uv
+    const a_Uv = gl.getAttribLocation(program, 'a_Uv');
+    // 获取u_Texture
+    const u_Texture = gl.getUniformLocation(program, 'u_Texture')
+    // 设置a_Screen_Size
+    gl.vertexAttrib2f(a_Screen_Size, canvasCtx.width, canvasCtx.height);
+
+    // 矩形顶点数据
+    var positions = [
+      30, 30, 0, 0,    //V0
+      30, 300, 0, 1,   //V1
+      300, 300, 1, 1,  //V2
+      30, 30, 0, 0,    //V0
+      300, 300, 1, 1,  //V2
+      300, 30, 1, 0    //V3
+    ]
+
+    // 激活属性a_Position;
+    gl.enableVertexAttribArray(a_Position);
+    // 激活属性a_Uv;
+    gl.enableVertexAttribArray(a_Uv);
+
+    // 创建缓存
+    const buffer = gl.createBuffer();
+    // 绑定定点缓存
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    
+    // 设置从缓存数据中读取a_Position的方式
+    gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 16, 0);
+    // 设置从缓存数据中读取a_Uv的方式
+    gl.vertexAttribPointer(a_Uv, 2, gl.FLOAT, false, 16, 8);
+
+    // 设置缓存数据
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+    // 设置清屏颜色为黑色
+    gl.clearColor(0, 0, 0, 1);
+
+    // 渲染
+    function render(gl) {
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      if(positions.length <= 0) return;
+      gl.drawArrays(gl.TRIANGLES, 0, positions.length / 4)
+    }
+
+    // 加载纹理
+    loadTexture(gl, '../../img/wave.jpg', u_Texture, () => render(gl));
+
+  </script>
+  
+</body>
+</html>
