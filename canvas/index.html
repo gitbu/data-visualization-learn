@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <div onclick="makeCanvasToPhoto()" style="width: 100px; padding: 10px 30px;background: #eee;text-align: center">生成图片</div>
+  <canvas id="canvasBox" style="margin: 50px auto"></canvas>
+</body>
+<script>
+  function makeCanvasToPhoto() {
+    var that = this;
+    var canvas = document.getElementById("canvasBox");
+    var context = canvas.getContext('2d');
+    var ratio = getPixelRatio(context);  // 关键代码
+    canvas.width = 300 * ratio; // 画布宽度
+    canvas.height = 300 * ratio; // 画布高度
+    var divWidth = 300 * ratio; // 用于内容居中
+    var divHeight = 300 * ratio; // 用于内容居中
+    
+    // 画矩形
+    context.beginPath();
+    context.fillStyle = "#abcdef";
+    context.fillRect(0, 0, divWidth, divHeight);
+    context.closePath();
+
+    // 图片
+    context.beginPath();
+    var imgObj = new Image();
+    imgObj.crossOrigin = "anonymous";  // 在iOS 9设备中，如果src是base64格式，设置了crossOrigin 属性，会导致无法执行image.onload 而执行image.onerror 函数
+    imgObj.src = 'http://img0.imgtn.bdimg.com/it/u=458129248,1588126214&fm=26&gp=0.jpg';
+    imgObj.onload = function () {
+        var imgWidth = '150';
+        var imgHeight = '150';
+        context.drawImage(this, 50, 50, imgWidth * ratio, imgHeight * ratio)
+    };
+    context.closePath();
+
+    // 文本
+    context.beginPath();
+    context.font = '32px bold';
+    context.fillStyle = '#1a1a1a';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText('文本', 50, 240);
+    context.closePath();
+
+    context.drawImage(canvas, 0, 0, divWidth, divHeight);
+    var base64Obj = canvas.toDataURL('image/png', 1);
+    console.log(base64Obj);
+}
+
+function getPixelRatio(context) {
+    var backingStore = context.backingStorePixelRatio ||
+        context.webkitBackingStorePixelRatio ||
+        context.mozBackingStorePixelRatio ||
+        context.msBackingStorePixelRatio ||
+        context.oBackingStorePixelRatio ||
+        context.backingStorePixelRatio || 1;
+    return (window.devicePixelRatio || 1) / backingStore;
+};
+</script>
+</html>

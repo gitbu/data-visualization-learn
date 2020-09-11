@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <canvas height="500" width="500" id="canvas"></canvas>
+  <script>
+    const canvasEle = document.querySelector('#canvas');
+    const ctx = canvasEle.getContext('2d');
+
+    function draw(points, strokeStyle, fill) {
+      ctx.translate(250, 250);
+      ctx.scale(1.0, -1.0);
+      ctx.beginPath();
+      ctx.moveTo(...points[0]);
+      for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(...points[i]);
+      }
+      ctx.closePath();
+
+      ctx.stroke();
+    }
+
+    function parametric(xFunc, yFunc) {
+      return function(start, end, seg = 100, ...args) {
+        const points = [];
+        for (let i = 0; i < seg; i++) {
+          const per = i / seg;
+          const curA = (end - start) * per + start;
+          const x = xFunc(curA)
+          const y = yFunc(curA);
+          points.push([x, y]);
+        }
+
+        return {
+          draw: draw.bind(null, points, 'black', 'blue'),
+          points
+        }
+      }
+    }
+
+    // 抛物线参数方程
+    const para = parametric(
+      t => 25 * t,
+      t => 25 * t ** 2,
+    );
+
+    // 绘制抛物线
+    para(-5.5, 5.5).draw(ctx);
+
+  </script>
+  
+</body>
+</html>
